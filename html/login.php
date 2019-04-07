@@ -1,0 +1,48 @@
+<?php
+	$mysqli=new mysqli("localhost","root","12345678","shop");
+	if(!$mysqli){
+		die('连接出错');
+	}
+	session_start();
+	$phone=$_POST['phone'];
+	$psw=$_POST['passw'];
+	$login=$_POST['login'];
+	$verfiy=trim(strtolower($_POST['verify']));
+	$verfiyCode=trim(strtolower($_SESSION['verfiyCode']));
+	$sql="select * from tb_user where phone='{$_POST["phone"]}' and password='{$_POST["passw"]}'";
+	$result=$mysqli->query($sql);
+	$row=mysqli_fetch_assoc($result);
+	$user=$row["username"];
+	if(mysqli_num_rows($result)==1){
+		//$_SESSION['username']=$user;
+		//$_SESSION['passw']=$pas;
+		if($verfiy==$verfiyCode){
+			if($login==1){
+			$row=mysqli_fetch_assoc($result);
+			setcookie('username',$user,time()+3600);
+			$auth=md5($user,$psw).":".$row['id'];
+			setcookie('auth',$auth,time()+3600);
+			}
+			else{
+				setcookie('username',$user);
+			}
+			exit("<script>
+			alert('登陆成功');
+			location.href='index.php';
+			</script>");
+		}
+		else{
+			exit("<script>
+			alert('验证码错误，请重新输入');
+			location.href='login.html';
+			</script>");
+			
+		}
+	}
+	else{
+		exit("<script>
+		alert('用户名或密码错误，请重新输入！');
+		location.href='login.html';
+		</script>");
+	}
+?>
